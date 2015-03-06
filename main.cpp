@@ -71,7 +71,24 @@ http://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/y
 int main(int argc, char** argv) {
    
   vector<double> X, Y;
+  string market;
   string inputFileName = "data.in";
+  string unit;
+  
+  while (true) {
+    cout << "Choose US or CHN market, enter 'US' or CHN:" << endl; 
+    cin >> market;
+    if (market.compare("CHN") == 0) {
+      unit = "￥";
+      break;
+    } else if (market.compare("US") == 0){
+      unit = "$";
+      break;
+    } else {
+      cout << "Input error!" << endl;
+    }
+  }
+  
 
   // Read data from data.csv
   ifstream infile(inputFileName);
@@ -95,7 +112,7 @@ int main(int argc, char** argv) {
    
   int date = 4;
    
-  cout << "Historica(absolute) volatility of smoothed one-month yield " << curve->getHistoricalVolatility(30) << endl;
+  cout << "Historica(absolute) volatility of smoothed one-month yield " << curve->getHistoricalVolatility(30) << unit << endl;
   while (true) {
     int term, date;
     cout << "Enter a term, or -1 to exit:"<<endl;
