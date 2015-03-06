@@ -71,9 +71,10 @@ http://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/y
 int main(int argc, char** argv) {
    
   vector<double> X, Y;
+  string inputFileName = "data.in";
 
   // Read data from data.csv
-  ifstream infile("data.csv");
+  ifstream infile(inputFileName);
   string line;
   int count = 0;
   while (infile >> line) {
@@ -87,7 +88,7 @@ int main(int argc, char** argv) {
     } catch (...) {
     }
   }
-  cout << "Read " << count << " historical data from data.csv" << endl;
+  cout << "Read " << count << " historical data from " << inputFileName << endl;
   infile.close();
    
   CYieldCurve *curve = new CYieldCurve(X, Y);
