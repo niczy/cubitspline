@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cmath> 
@@ -69,19 +70,25 @@ follows non standard Brownian motion. You will then hard code alpha = 0.2. use c
 http://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/yieldmethod.aspx */
 int main(int argc, char** argv) {
    
-  int n;
-  cout << "Enter the number of historical yield:" <<endl;
-  cin >> n;
-  std::vector<double> X, Y;
-  cout << "Enter " << n << " historical yield in the format of: date yield" << endl;
-  for (int i = 0; i < n; i++) {
-    double date, yield;
-    cin >> date >> yield;
-    X.push_back(date);
-    Y.push_back(yield);
+  vector<double> X, Y;
+
+  // Read data from data.csv
+  ifstream infile("data.csv");
+  string line;
+  int count = 0;
+  while (infile >> line) {
+    count++;
+    int commaIdx = line.find(",");
+    string data = line.substr(0, commaIdx);
+    try {
+      double value = stod(line.substr(commaIdx + 1));
+      X.push_back(count);
+      Y.push_back(value);
+    } catch (...) {
+    }
   }
-  //X[0]=0.1; X[1]=0.4; X[2]=1.2; X[3]=1.8; X[4]=2.0;
-  //Y[0]=0.1; Y[1]=0.7; Y[2]=0.9; Y[3]=1.1; Y[4]=1.9;
+  cout << "Read " << count << " historical data from data.csv" << endl;
+  infile.close();
    
   CYieldCurve *curve = new CYieldCurve(X, Y);
    
