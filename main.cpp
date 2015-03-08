@@ -42,9 +42,8 @@ class CYieldCurve {
       return s(date);
     }
 
-    double getSmoothedDiscountFactor(int term, int date) {
-      // TODO(shuwen): Define this.
-      return 0.0;
+    double getDiscountFactor(int month) {
+      return exp(-getSmootedYield(0) * month / 12);
     }
 
     double getHistoricalVolatility(int T) {
@@ -56,8 +55,7 @@ class CYieldCurve {
     }
 
     double getSpeedOfMeanReversion() {
-      // TODO(shuwen): Define this.
-      return 0.0;
+      return 0.2;
     }
 };
 
@@ -73,6 +71,7 @@ int main(int argc, char** argv) {
    
   int TOTAL_TIME = 11;
   string MATU[] = {"1 Mo", "3 Mo", "6 Mo", "1 Yr", "2 Yr", "3 Yr", "5 Yr", "7 Yr", "10 Yr", "20 Yr", "30 Yr"};
+  int month[] = {1, 3, 6, 12, 24, 36, 60, 84, 120, 240, 360};
   vector<vector<double> > X(TOTAL_TIME), Y(TOTAL_TIME);
   string market;
   string inputFileName = "USTREASURY-YIELD.csv";
@@ -104,7 +103,24 @@ int main(int argc, char** argv) {
   infile.close();
   for (int i = 0 ; i < TOTAL_TIME; i++) {
     CYieldCurve *curve = new CYieldCurve(X[i], Y[i]);
-    cout << "Yield for "  << MATU[i] << " at today is " << curve->getSmootedYield(0) << endl;
+    cout << "Yield for "  << MATU[i] << " at today is " << curve->getSmootedYield(0) <<
+      " discount factor is " << curve->getDiscountFactor(month[i]) << endl;
   }
+
+  // Caculate historical volatility.
+  double sum = 0.0;
+  for (int i = 0; i < Y[0].size(); i++) {
+    sum += Y[0][i];
+  }
+  double avg = sum / Y[0].size();
+  double s = 0.0;
+  for (int i = 0; i < Y[0].size(); i++) {
+    s += pow(Y[0][i] - avg, 2);
+  }
+  s /= Y[0].size() - 1; 
+  s *= sqrt(22);
+  cout << "historical (absolute) volatility of the smoothed one-month yield is " << s << endl;
+  cout << "speed of mean-reversion is 0.2" << endl;
+
   return EXIT_SUCCESS;
 }
