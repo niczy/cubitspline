@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm> 
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
@@ -70,62 +71,40 @@ follows non standard Brownian motion. You will then hard code alpha = 0.2. use c
 http://www.treasury.gov/resource-center/data-chart-center/interest-rates/Pages/yieldmethod.aspx */
 int main(int argc, char** argv) {
    
-  vector<double> X, Y;
+  int TOTAL_TIME = 11;
+  string MATU[] = {"1 Mo", "3 Mo", "6 Mo", "1 Yr", "2 Yr", "3 Yr", "5 Yr", "7 Yr", "10 Yr", "20 Yr", "30 Yr"};
+  vector<vector<double> > X(TOTAL_TIME), Y(TOTAL_TIME);
   string market;
-  string inputFileName = "data.in";
-  string unit;
-  
-  while (true) {
-    cout << "Choose US or CHN market, enter 'US' or CHN:" << endl; 
-    cin >> market;
-    if (market.compare("CHN") == 0) {
-      unit = "￥";
-      break;
-    } else if (market.compare("US") == 0){
-      unit = "$";
-      break;
-    } else {
-      cout << "Input error!" << endl;
-    }
-  }
-  
+  string inputFileName = "USTREASURY-YIELD.csv";
 
   // Read data from data.csv
   ifstream infile(inputFileName);
   string line;
+  getline(infile, line);
+
   int count = 0;
-  while (infile >> line) {
-    count++;
+  while (getline(infile, line)) {
+    count--;
     int commaIdx = line.find(",");
-    string data = line.substr(0, commaIdx);
+    line = line.substr(commaIdx+1);
     try {
-      double value = stod(line.substr(commaIdx + 1));
-      X.push_back(count);
-      Y.push_back(value);
+      for (int i = 0; i < TOTAL_TIME; i++) {
+        double value = stod(line);
+        X[i].push_back(count);
+        Y[i].push_back(value);
+        line = line.substr(line.find(",") + 1);
+      }
     } catch (...) {
     }
   }
-  cout << "Read " << count << " historical data from " << inputFileName << endl;
-  infile.close();
-   
-  CYieldCurve *curve = new CYieldCurve(X, Y);
-   
-  int date = 4;
-   
-  cout << "Historica(absolute) volatility of smoothed one-month yield " << curve->getHistoricalVolatility(30) << unit << endl;
-  while (true) {
-    int term, date;
-    cout << "Enter a term, or -1 to exit:"<<endl;
-    cin >> term;
-    if (term == -1) {
-      cout << "Exiting!" << endl;
-      break;
-    }
-    cout <<"and historical date:" << endl;
-    cin >> date;
-    cout << "Yield for date: " << date << " is " << curve->getSmootedYield(date) << endl;
-    cout << "\n\n\n\n" << endl;
+  for (int i = 0; i < TOTAL_TIME; i++) {
+    reverse(X[i].begin(), X[i].end());
+    reverse(Y[i].begin(), Y[i].end());
   }
-   
+  infile.close();
+  for (int i = 0 ; i < TOTAL_TIME; i++) {
+    CYieldCurve *curve = new CYieldCurve(X[i], Y[i]);
+    cout << "Yield for "  << MATU[i] << " at today is " << curve->getSmootedYield(0) << endl;
+  }
   return EXIT_SUCCESS;
 }
